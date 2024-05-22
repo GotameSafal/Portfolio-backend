@@ -1,8 +1,15 @@
 import multer from "multer";
-const storage = multer.memoryStorage();
-const multipleUpload = multer({ storage }).fields([
-  { name: "banner", maxCount: 1 },
-  { name: "project", maxCount: 1 },
-  { name: "contact", maxCount: 1 },
-]);
-export default multipleUpload;
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads");
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    const fileExtension = file.originalname.split(".").pop();
+    cb(null, file.fieldname + "-" + uniqueSuffix + "." + fileExtension);
+  },
+});
+
+const upload = multer({ storage });
+export default upload;

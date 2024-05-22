@@ -16,30 +16,37 @@ export const registerUser = catchAsyncError(async (req, res, next) => {
     password,
   });
 
-  res
-    .status(201)
-    .json({
-      success: true,
-      message: "user created successfully",
-    });
+  res.status(201).json({
+    success: true,
+    message: "user created successfully",
+  });
 });
 
-export const loginUser = catchAsyncError(async (req, res, next) => {
-  const { email, password } = req.body;
-  const user = await User.findOne({ email });
-  const comparePassword = await user.comparePassword(password);
-  if (!comparePassword)
-    return next(new ErrorHandler("Invalid credentials", 400));
-  const token = await user.getjwtToken();
+// export const loginUser = catchAsyncError(async (req, res, next) => {
+//   const { email, password } = req.body;
+//   const user = await User.findOne({ email });
+//   const comparePassword = await user.comparePassword(password);
+//   if (!comparePassword)
+//     return next(new ErrorHandler("Invalid credentials", 400));
+//   const token = await user.getjwtToken();
 
-  res
-    .status(201)
-    .json({
-      success: true,
-      message: "logged in successfully",
-      token,
-    });
-});
+//   res
+//     .status(201)
+//     .cookie("portfolio", token, {
+//       maxAge: 60 * 60 * 1000,
+//     })
+//     .json({
+//       success: true,
+//       message: "logged in successfully",
+//       token,
+//     });
+// });
+export const loginUser = catchAsyncError(async(req, res, next)=>{
+  console.log(req.body)
+  res.status(200).json({
+    success:true
+  })
+})
 
 export const logoutUser = catchAsyncError(async (req, res, next) => {
   res.cookie("portfolio", null, {

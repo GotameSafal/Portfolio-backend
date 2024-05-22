@@ -1,53 +1,26 @@
 import mongoose from "mongoose";
 const schema = new mongoose.Schema({
-
- 
-  skills: {
-    frontend: [{ type: String }],
-    backend: [{ type: String }],
-    others: [{ type: String }],
+  name: {
+    type: String,
+    required: [true, "Please enter project name"],
   },
-  projects: [
-    {
-      image: {
-        url: {
-          type: String,
-          required: true,
-        },
-        public_id: {
-          type: String,
-          required: true,
-        },
-      },
-      title: {
-        type: String,
-        required: true,
-        trim: true,
-      },
-      subTitle: { type: String, required: true, trim: true },
-      description: { type: String, required: true, trime: true },
-      technologies: [{ type: String }],
-      goLive: { type: String, required: true },
-      sourceCode: { type: String, required: true },
-    },
-  ],
-  contacts: [
-    {
-      image: {
-        url: {
-          type: String,
-          required: true,
-        },
-        public_id: {
-          type: String,
-          required: true,
-        },
-      },
-      title: { type: String, required: true, trim: true },
-      description: { type: String, required: true, trim: true },
-      redirectUrl: String
-    },
-  ],
+  imgUrl: {
+    type: String,
+    required: [true, "Please enter prjects image url"],
+  },
+  description: {
+    type: String,
+    required: [true, "Please enter project description"],
+  },
+  projecturl: {
+    type: String,
+    required: [true, "Please enter preject url"],
+  },
+  gitsource: {
+    type: String,
+    required: [true, "Please enter github project url"],
+  },
+  technologies: [{ type: String, required: true }],
 });
-const Project = new mongoose.model("portfolio", schema);
+const Project = new mongoose.model("project", schema);
 export default Project;

@@ -5,14 +5,18 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import projectRoute from "./routes/projectRoutes.js";
 import userRoute from "./routes/userRoutes.js";
+import { dirname, join } from 'path';
+import { fileURLToPath } from "url";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 const app = express();
 config({ path: "./config/config.env" });
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(cors({ origin: "*" }));
+app.use(cors());
 app.use(errorMiddleware);
-
+app.use('/uploads', express.static(join(__dirname, 'uploads')));
 app.use("/api", projectRoute);
 app.use("/api", userRoute);
 

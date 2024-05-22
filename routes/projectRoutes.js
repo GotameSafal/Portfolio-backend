@@ -1,20 +1,17 @@
 import express from "express";
 import {
-  webDetails,
-  createProject,
-  deleteProject,
-  createDetails,
-  createContacts,
-  deleteContacts,
-  updateSkills,
+  createproject,
+  deleteproject,
+  getproject,
+  updateproject,
 } from "../controllers/projectController.js";
-import multipleUpload from "../middlewares/multer.js";
+import upload from "../middlewares/multer.js";
+
 const router = express.Router();
-router.route("/details").get(webDetails).post(multipleUpload, createDetails);
-router.route("/project").post(multipleUpload, createProject);
-router.route("/project/:id").delete(deleteProject);
-router.route("/contacts").post(multipleUpload, createContacts);
-router.route("/contacts/:id").delete(deleteContacts);
-router.route("/skills").put(updateSkills);
+router
+  .route("/projects")
+  .get(getproject)
+  .post(upload.single("project_image"), createproject);
+router.route("/projects/:id").delete(deleteproject).put(updateproject);
 
 export default router;
