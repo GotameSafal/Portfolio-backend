@@ -7,11 +7,9 @@ export const getproject = catchAsyncError(async (req, res, next) => {
   let projects;
   if (nodecache.has("projects")) {
     projects = JSON.parse(nodecache.get("projects"));
-    console.log("has");
   } else {
     projects = await Project.find();
     nodecache.set("projects", JSON.stringify(projects));
-    console.log("not");
   }
   res.status(200).json({
     success: true,
@@ -21,7 +19,6 @@ export const getproject = catchAsyncError(async (req, res, next) => {
 
 export const deleteproject = catchAsyncError(async (req, res, next) => {
   const project = await Project.findById(req.params.id);
-  console.log(req.params.id);
   if (!project)
     return next(
       new ErrorHandler(`Project with id ${req.params.id} not found`, 404)
@@ -40,7 +37,7 @@ export const updateproject = catchAsyncError(async (req, res, next) => {
     return next(
       new ErrorHandler(`Project with id ${req.params.id} not found`, 404)
     );
-}
+  }
   nodecache.del("projects");
   res.status(200).json({
     success: true,
@@ -50,13 +47,11 @@ export const updateproject = catchAsyncError(async (req, res, next) => {
 
 export const createproject = catchAsyncError(async (req, res, next) => {
   let { technologies } = req.body;
-  console.log("file", req.files)
-  console.log(req.body)
   technologies = technologies.split(",").map((item) => item.trim());
   const project = await Project.create({
     ...req.body,
     technologies,
-    imgUrl: req.file.path,
+    imgUrl: `${process.env.HOSTURL}/${req.file.path}`,
   });
   nodecache.del("projects");
 

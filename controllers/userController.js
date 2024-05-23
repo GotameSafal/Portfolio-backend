@@ -1,5 +1,6 @@
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import { ErrorHandler } from "../utils/errorHandler.js";
+import nodemailer from "nodemailer"
 import User from "../models/usermodel.js";
 export const registerUser = catchAsyncError(async (req, res, next) => {
   const { email, password, confirmPassword } = req.body;
@@ -22,31 +23,25 @@ export const registerUser = catchAsyncError(async (req, res, next) => {
   });
 });
 
-// export const loginUser = catchAsyncError(async (req, res, next) => {
-//   const { email, password } = req.body;
-//   const user = await User.findOne({ email });
-//   const comparePassword = await user.comparePassword(password);
-//   if (!comparePassword)
-//     return next(new ErrorHandler("Invalid credentials", 400));
-//   const token = await user.getjwtToken();
+export const loginUser = catchAsyncError(async (req, res, next) => {
+  const { email, password } = req.body;
+  const user = await User.findOne({ email });
+  const comparePassword = await user.comparePassword(password);
+  if (!comparePassword)
+    return next(new ErrorHandler("Invalid credentials", 400));
+  const token = await user.getjwtToken();
 
-//   res
-//     .status(201)
-//     .cookie("portfolio", token, {
-//       maxAge: 60 * 60 * 1000,
-//     })
-//     .json({
-//       success: true,
-//       message: "logged in successfully",
-//       token,
-//     });
-// });
-export const loginUser = catchAsyncError(async(req, res, next)=>{
-  console.log(req.body)
-  res.status(200).json({
-    success:true
-  })
-})
+  res
+    .status(201)
+    .cookie("portfolio", token, {
+      maxAge: 60 * 60 * 1000,
+    })
+    .json({
+      success: true,
+      message: "logged in successfully",
+      token,
+    });
+});
 
 export const logoutUser = catchAsyncError(async (req, res, next) => {
   res.cookie("portfolio", null, {
@@ -56,5 +51,36 @@ export const logoutUser = catchAsyncError(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: "successfully logged out",
+  });
+});
+
+export const sendMail = catchAsyncError(async (req, res, next) => {
+  const { fullname, email, phone, message } = req.body;
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    port: 465,
+    auth: {
+      user: process.env.EMAIL,
+      pass: process.env.PASS, //
+    },
+  });
+
+  const mailOptions = {
+    from: process.env.EMAIL,
+    to: "lamichhanem36@gmail.com",
+    subject: `${email}/portfolio/${phone}/${fullname}`,
+    text: message,
+  };
+
+  // Send the email
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      res.status(500).send("Error occurred while sending email.");
+    } else {
+      res.status(201).json({
+        success: true,
+        message: "Mail send successfully",
+      });
+    }
   });
 });
