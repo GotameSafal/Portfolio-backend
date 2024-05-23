@@ -46,6 +46,7 @@ export const updateproject = catchAsyncError(async (req, res, next) => {
 });
 
 export const createproject = catchAsyncError(async (req, res, next) => {
+  console.log(req.body);
   let { technologies } = req.body;
   technologies = technologies.split(",").map((item) => item.trim());
   const project = await Project.create({
