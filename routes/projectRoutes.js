@@ -5,13 +5,13 @@ import {
   getproject,
   updateproject,
 } from "../controllers/projectController.js";
-import upload from "../middlewares/multer.js";
+import { singleUpload } from "../middlewares/multer.js";
 
 const router = express.Router();
 router
   .route("/projects")
   .get(getproject)
-  .post(upload.single("project_image"), createproject);
+  .post(singleUpload, createproject);
 router.route("/projects/:id").delete(deleteproject).put(updateproject);
 
 export default router;

@@ -5,8 +5,14 @@ const schema = new mongoose.Schema({
     required: [true, "Please enter project name"],
   },
   imgUrl: {
-    type: String,
-    required: [true, "Please enter prjects image url"],
+    url: {
+      type: String,
+      required: true,
+    },
+    public_id: {
+      type: String,
+      required: true,
+    },
   },
   description: {
     type: String,
