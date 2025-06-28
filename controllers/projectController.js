@@ -89,10 +89,14 @@ export const createproject = catchAsyncError(async (req, res, next) => {
     const result = await cloudinary.uploader.upload(fileUri.content);
 
     const project = await Project.create({
-      ...req.body,
+      title: req.body.title,
+      description: req.body.description,
+      detailedDescription: req.body.detailedDescription,
+      liveLink: req.body.liveLink,
+      githubLink: req.body.githubLink || "", // Handle empty GitHub link
       technologies,
       imgUrl: {
-        url: result.url,
+        url: result.secure_url,
         public_id: result.public_id,
       },
     });
@@ -102,10 +106,8 @@ export const createproject = catchAsyncError(async (req, res, next) => {
       message: "Successfully created a project",
       project,
     });
-  } catch (err) {
-    console.log(err);
-    return next(new ErrorHandler("Image upload failed", 500));
+  } catch (error) {
+    // Handle error
+    next(error);
   }
 });
-
-

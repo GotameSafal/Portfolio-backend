@@ -13,5 +13,5 @@ router.route("/register").post(registerUser);
 router.route("/login").post(loginUser);
 router.route("/logout").get(logoutUser);
 router.route("/sendmail").post(sendMail);
-router.route("/my-info").get(isAuthenticated,getMyDetails);
+router.route("/me").get(isAuthenticated, getMyDetails);
 export default router;

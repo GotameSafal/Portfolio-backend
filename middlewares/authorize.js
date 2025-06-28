@@ -5,12 +5,14 @@ import User from "../models/usermodel.js";
 export const isAuthenticated = async (req, res, next) => {
   try {
     const token = req.headers.authorization;
-    
+
     if (!token) {
       throw new ErrorHandler("Please log in to access this resource", 401);
     }
 
+    console.log("token", token);
     const isBearerToken = token.startsWith("Bearer ");
+    console.log("isBearerToken", isBearerToken);
     if (!isBearerToken) {
       throw new ErrorHandler("Invalid token format", 401);
     }
@@ -18,14 +20,15 @@ export const isAuthenticated = async (req, res, next) => {
     const jwtPayload = token.split(" ")[1];
 
     const decryptdata = jwt.verify(jwtPayload, process.env.SECRET_KEY);
-    req.user = await User.findById(decryptdata._id).select("email")
+    console.log("decryptdata", decryptdata);
+    req.user = await User.findById(decryptdata._id).select("email");
 
+    console.log("req.user,", req);
     next();
   } catch (error) {
     next(new ErrorHandler("Authentication failed", 401));
   }
 };
-
 
 export const authenticateRole =
   (...roles) =>
@@ -35,4 +38,4 @@ export const authenticateRole =
         new ErrorHandler("You are not authorized to access this resource", 401)
       );
     next();
-  };                                                                                                                     
+  };

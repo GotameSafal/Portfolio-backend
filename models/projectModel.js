@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
 const schema = new mongoose.Schema({
-  name: {
+  title: {
     type: String,
-    required: [true, "Please enter project name"],
+    required: [true, "Please enter project title"],
   },
   imgUrl: {
     url: {
@@ -22,13 +22,13 @@ const schema = new mongoose.Schema({
     type: String,
     required: [true, "Please enter project detailed description"],
   },
-  projecturl: {
+  liveLink: {
     type: String,
-    required: [true, "Please enter preject url"],
+    required: [true, "Please enter live project URL"],
   },
-  gitsource: {
+  githubLink: {
     type: String,
-    required: [true, "Please enter github project url"],
+    required: false, // Changed from required to optional
   },
   technologies: [{ type: String, required: true }],
 });

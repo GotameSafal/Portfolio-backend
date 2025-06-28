@@ -61,18 +61,11 @@ export const loginUser = catchAsyncError(async (req, res, next) => {
   await user.save();
 
   const token = user.getJwtToken();
-  console.log(token);
-  res
-    .status(200)
-    .cookie("portfolio", token, {
-      maxAge: 60 * 60 * 1000,
-      httpOnly: true,
-    })
-    .json({
-      success: true,
-      message: "Logged in successfully",
-      token,
-    });
+  res.status(200).json({
+    success: true,
+    message: "Logged in successfully",
+    token,
+  });
 });
 
 export const logoutUser = catchAsyncError(async (req, res, next) => {
@@ -88,41 +81,199 @@ export const logoutUser = catchAsyncError(async (req, res, next) => {
 
 export const sendMail = catchAsyncError(async (req, res, next) => {
   const { fullname, email, phone, message } = req.body;
+
+  if (!fullname || !email || !phone || !message) {
+    return next(new ErrorHandler("All fields are required", 400));
+  }
+
+  // Create email transporter
   const transporter = nodemailer.createTransport({
     service: "gmail",
     port: 465,
+    secure: true,
     auth: {
       user: process.env.EMAIL,
       pass: process.env.PASS,
     },
   });
 
+  // HTML email template
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          line-height: 1.6;
+          color: #333;
+        }
+        .container {
+          max-width: 600px;
+          margin: 0 auto;
+          padding: 20px;
+          border: 1px solid #ddd;
+          border-radius: 5px;
+        }
+        .header {
+          background-color: #f5f5f5;
+          padding: 10px 20px;
+          border-radius: 5px 5px 0 0;
+          margin-bottom: 20px;
+        }
+        .content {
+          padding: 0 20px;
+        }
+        .footer {
+          margin-top: 30px;
+          padding-top: 10px;
+          border-top: 1px solid #ddd;
+          font-size: 12px;
+          color: #777;
+        }
+        h2 {
+          color: #0066cc;
+        }
+        .info-item {
+          margin-bottom: 10px;
+        }
+        .label {
+          font-weight: bold;
+          display: inline-block;
+          width: 100px;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h2>New Contact Form Submission</h2>
+        </div>
+        <div class="content">
+          <div class="info-item">
+            <span class="label">Name:</span> ${fullname}
+          </div>
+          <div class="info-item">
+            <span class="label">Email:</span> ${email}
+          </div>
+          <div class="info-item">
+            <span class="label">Phone:</span> ${phone}
+          </div>
+          <div class="info-item">
+            <span class="label">Message:</span>
+          </div>
+          <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin-top: 10px;">
+            ${message.replace(/\n/g, "<br>")}
+          </div>
+        </div>
+        <div class="footer">
+          This email was sent from your portfolio website contact form.
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  // Email options
   const mailOptions = {
     from: process.env.EMAIL,
-    to: "lamichhanem36@gmail.com",
-    subject: `${email}/portfolio/${phone}/${fullname}`,
-    text: message,
+    to: "lamichhanem36@gmail.com", // Your email address
+    subject: `Portfolio Contact: ${fullname}`,
+    html: htmlContent,
+    replyTo: email, // Set reply-to as the sender's email
   };
 
-  // Send the email
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      res.status(500).send("Error occurred while sending email.");
-    } else {
-      res.status(201).json({
-        success: true,
-        message: "Mail send successfully",
-      });
-    }
-  });
+  try {
+    // Send the email
+    await transporter.sendMail(mailOptions);
+
+    // Send confirmation email to the sender
+    const confirmationMailOptions = {
+      from: process.env.EMAIL,
+      to: email,
+      subject: "Thank you for contacting me",
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              line-height: 1.6;
+              color: #333;
+            }
+            .container {
+              max-width: 600px;
+              margin: 0 auto;
+              padding: 20px;
+              border: 1px solid #ddd;
+              border-radius: 5px;
+            }
+            .header {
+              background-color: #f5f5f5;
+              padding: 10px 20px;
+              border-radius: 5px 5px 0 0;
+              margin-bottom: 20px;
+            }
+            .content {
+              padding: 0 20px;
+            }
+            .footer {
+              margin-top: 30px;
+              padding-top: 10px;
+              border-top: 1px solid #ddd;
+              font-size: 12px;
+              color: #777;
+            }
+            h2 {
+              color: #0066cc;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h2>Thank You for Contacting Me</h2>
+            </div>
+            <div class="content">
+              <p>Hello ${fullname},</p>
+              <p>Thank you for reaching out to me through my portfolio website. I have received your message and will get back to you as soon as possible.</p>
+              <p>Here's a summary of the information you provided:</p>
+              <ul>
+                <li><strong>Name:</strong> ${fullname}</li>
+                <li><strong>Email:</strong> ${email}</li>
+                <li><strong>Phone:</strong> ${phone}</li>
+              </ul>
+              <p>Best regards,</p>
+              <p>Safal Gotame</p>
+            </div>
+            <div class="footer">
+              This is an automated response. Please do not reply to this email.
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+    };
+
+    await transporter.sendMail(confirmationMailOptions);
+
+    res.status(201).json({
+      success: true,
+      message: "Message sent successfully! I'll get back to you soon.",
+    });
+  } catch (error) {
+    console.error("Email sending error:", error);
+    return next(
+      new ErrorHandler("Failed to send email. Please try again later.", 500)
+    );
+  }
 });
 
 export const getMyDetails = catchAsyncError(async (req, res, next) => {
-  res
-    .status(200)
-    .json({
-      success: true,
-      message: "successfully retrieved user",
-      user: req.user,
-    });
+  res.status(200).json({
+    success: true,
+    message: "successfully retrieved user",
+    user: req.user,
+  });
 });
